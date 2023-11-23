@@ -1,0 +1,10 @@
+appname: sample
+common_args:
+  name: sample 1
+tasks:
+  sample_1:
+    class: SampleThread
+  sample_2:
+    class: SampleThread
+    args:
+      name: sample 2
