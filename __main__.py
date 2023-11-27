@@ -39,19 +39,27 @@ def main():
     elif args.action ==  'status':
         validate_args(['--zk-host', '--appname'])
         status(args)
+    
+    exit(0)
 
 def run(args):
-    client = KazooCoordClient(args.zk_host)
-    task_pool = TaskPool(client, args.workername, args.appname, args.conf_path, args.thread_classes_paths)
+    try:
+        client = KazooCoordClient(args.zk_host)
+        task_pool = TaskPool(client, args.workername, args.appname, args.conf_path, args.thread_classes_paths)
 
-    def handler(signum, frame):
-        task_pool.stop()
-        exit(0)
-    signal.signal(signal.SIGINT, handler)
+        def handler(signum, frame):
+            task_pool.stop()
+            exit(0)
+        signal.signal(signal.SIGINT, handler)
 
-    while True:
-        task_pool.watch()
-        sleep(int(args.poll_interval))
+        while True:
+            task_pool.watch()
+            sleep(int(args.poll_interval))
+
+    except Exception as e:
+        print(str(e))
+        if 'task_pool' in locals():
+            task_pool.stop()
 
 def update_conf(args):
     client = KazooCoordClient(args.zk_host)
@@ -90,7 +98,10 @@ def status(args):
     worker_task = {}
     locks_path = f'{app_path}/locks'
     for task in client.get_children(locks_path):
-        task_lock = sorted(client.get_children(f'{locks_path}/{task}'))[0]
+        children = client.get_children(f'{locks_path}/{task}')
+        if not children:
+            continue
+        task_lock = sorted(children)[0]
         task_lock_node = f'{locks_path}/{task}/{task_lock}'
         node_data = client.get(task_lock_node)
         worker = node_data[0].decode('ascii')
