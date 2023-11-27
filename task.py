@@ -133,6 +133,8 @@ class TaskPool():
         if num_tasks_running > max_tasks:
             self.stop_tasks(num_tasks_running - max_tasks)
 
+        sys.stdout.flush()
+
     def get_max_tasks(self):
         numnodes = len(self.party)
         numtasks = len(self.tasks)
