@@ -114,7 +114,7 @@ class TaskPool():
                 self.conf_path,
                 self.classes[thread_class_name],
                 **kwargs)
-            print(f'[{taskname}] added: starting task')
+            print(f'[{taskname}] task added: trying to acquire lock')
         except Exception as e:
             print(f'[{taskname}] error: {str(e)}')
 
@@ -218,6 +218,7 @@ class Task():
     def start(self):
         self.acquire_lock()
         if not self.thread_is_alive() and self.has_lock():
+            print(f'[{self.taskname}] lock acquired: starting task')
             self.thread = self.thread_class(**self.thread_args)
             self.thread.name = self.taskname
             self.thread.set_stop_event(self.stop_event)
@@ -229,6 +230,7 @@ class Task():
         return False
 
     def stop_event_set(self):
+        print(f'[{self.taskname}] stopping task')
         self.stop_event.set()
 
     def stop(self):
@@ -238,6 +240,7 @@ class Task():
             while self.thread_is_alive():
                 sleep(0.1)
         self.release_lock()
+        print(f'[{self.taskname}] lock released')
         self.stop_event.clear()
         self.thread = None
 
