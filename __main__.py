@@ -123,7 +123,7 @@ def status(args):
         data_dict = {'modified_at': mtime, 'data': conf_dict}
         conf[conf_type] = data_dict
 
-    tasks = [ taskname for taskname in conf['tasks']['data'].keys() ]
+    tasks = [ { 'taskname': taskname } for taskname in conf['tasks']['data'].keys() ]
 
     if args.format == 'json':
         formatter = json.dumps
