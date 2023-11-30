@@ -123,6 +123,8 @@ def status(args):
         data_dict = {'modified_at': mtime, 'data': conf_dict}
         conf[conf_type] = data_dict
 
+    tasks = [ taskname for taskname in conf['tasks']['data'].keys() ]
+
     if args.format == 'json':
         formatter = json.dumps
     elif args.format == 'yaml':
@@ -130,6 +132,7 @@ def status(args):
 
     print(formatter({
         'workers': workers,
+        'tasks': tasks,
         'tasks_per_worker': worker_task,
         'configurations': conf
     }))
