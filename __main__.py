@@ -86,16 +86,15 @@ def status(args):
 
     app_path = f'/apps/{args.appname}'
 
-    workers = {}
+    workers = [ ]
     party_path = f'{app_path}/party'
     for member in client.get_children(party_path):
         member_data = client.get(f'{party_path}/{member}')
         worker = member_data[0].decode('ascii')
         ctime = datetime.fromtimestamp(member_data[1].ctime / 1000, timezone(timedelta(hours=-3))).isoformat()
-        data_dict = {'joined_at': ctime}
-        workers[worker] = data_dict
+        workers.append( { 'workername': worker, 'joined_at': ctime } )
 
-    worker_task = {}
+    worker_task = { }
     locks_path = f'{app_path}/locks'
     for task in client.get_children(locks_path):
         children = client.get_children(f'{locks_path}/{task}')
@@ -113,7 +112,7 @@ def status(args):
         else:
             worker_task[worker] = {task: data_dict}
 
-    conf = {}
+    conf = { }
     conf_path = f'{app_path}/conf'
     for conf_type in client.get_children(conf_path):
         conf_data = client.get(f'{conf_path}/{conf_type}')
