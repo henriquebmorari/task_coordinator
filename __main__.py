@@ -5,9 +5,9 @@ import signal
 import pathlib
 from time import sleep
 from task import TaskPool
-from datetime import datetime
 from argparse import ArgumentParser
 from coord_client import KazooCoordClient
+from datetime import datetime, timezone, timedelta
 
 def main():
     parser = ArgumentParser()
@@ -91,7 +91,7 @@ def status(args):
     for member in client.get_children(party_path):
         member_data = client.get(f'{party_path}/{member}')
         worker = member_data[0].decode('ascii')
-        ctime = datetime.fromtimestamp(member_data[1].ctime / 1000).isoformat()
+        ctime = datetime.fromtimestamp(member_data[1].ctime / 1000, timezone(timedelta(hours=-3))).isoformat()
         data_dict = {'joined_at': ctime}
         workers[worker] = data_dict
 
@@ -105,7 +105,7 @@ def status(args):
         task_lock_node = f'{locks_path}/{task}/{task_lock}'
         node_data = client.get(task_lock_node)
         worker = node_data[0].decode('ascii')
-        ctime = datetime.fromtimestamp(node_data[1].ctime / 1000).isoformat()
+        ctime = datetime.fromtimestamp(node_data[1].ctime / 1000, timezone(timedelta(hours=-3))).isoformat()
         data_dict = {'lock_acquired_at': ctime}
 
         if worker in worker_task:
@@ -119,7 +119,7 @@ def status(args):
         conf_data = client.get(f'{conf_path}/{conf_type}')
         conf_yaml = conf_data[0].decode('ascii')
         conf_dict = yaml.safe_load(conf_yaml)
-        mtime = datetime.fromtimestamp(conf_data[1].mtime / 1000).isoformat()
+        mtime = datetime.fromtimestamp(conf_data[1].mtime / 1000, timezone(timedelta(hours=-3))).isoformat()
         data_dict = {'modified_at': mtime, 'data': conf_dict}
         conf[conf_type] = data_dict
 
