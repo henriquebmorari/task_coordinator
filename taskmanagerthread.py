@@ -1,16 +1,21 @@
 from threading import Thread, Event
 
 class TaskManagerThread(Thread):
-    def set_stop_event(self, stop_event: Event):
-        self.stop_event = stop_event
+    """ 
+    Thread class to implement the tasks functionalities.
+    Extend this class overriding the "setup", "loop" and "stop" methods.
+    """
 
     def setup(self):
+        """Function to run when the thread starts"""
         return
 
     def loop(self):
+        """Function to run in loop during the execution of the thread"""
         return
 
     def stop(self):
+        """Function to run when the thread stops"""
         return
 
     def run(self):
@@ -27,3 +32,6 @@ class TaskManagerThread(Thread):
                     break
         except Exception as e:
             print(f'[{self.taskname}] error: {str(e)}')
+
+    def set_stop_event(self, stop_event: Event):
+        self.stop_event = stop_event

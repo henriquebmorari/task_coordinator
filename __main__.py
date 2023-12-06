@@ -5,47 +5,20 @@ import signal
 import pathlib
 from time import sleep
 from taskmanager import TaskPool
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawTextHelpFormatter
 from zookeeperclient import ZookeeperClient
 from datetime import datetime, timezone, timedelta
-
-def main():
-    parser = ArgumentParser()
-    parser.add_argument('action', type=str, choices=['run', 'update-conf', 'status'])
-    parser.add_argument('--zk-host', dest='zk_host', type=str, metavar='HOSTS_STRING')
-    parser.add_argument('--conf-path', dest='conf_path', type=lambda p: str(pathlib.Path(p).absolute()))
-    parser.add_argument('--thread-classes-paths', dest='thread_classes_paths', type=lambda paths: list(map(lambda path: str(pathlib.Path(path).absolute()), paths.split(','))))
-    parser.add_argument('--poll-interval', dest='poll_interval', type=int, default=5)
-    parser.add_argument('--workername', dest='workername', type=str)
-    parser.add_argument('--appname', dest='appname', type=str)
-    parser.add_argument('-f', dest='format', type=str, choices=['json', 'yaml'], default='json')
-    args = parser.parse_args()
-
-    def validate_args(required_options: list):
-        option_errors = []
-        for option in required_options:
-            dest = parser._option_string_actions[option].dest
-            if not getattr(args, dest):
-                option_errors += [option]
-        if option_errors:
-            parser.error(f'the following arguments are required: {", ".join(option_errors)}')
-
-    if args.action == 'run':
-        validate_args(['--zk-host', '--workername', '--appname', '--thread-classes-paths'])
-        run(args)
-    elif args.action ==  'update-conf':
-        validate_args(['--zk-host', '--conf-path'])
-        update_conf(args)
-    elif args.action ==  'status':
-        validate_args(['--zk-host', '--appname'])
-        status(args)
-    
-    exit(0)
 
 def run(args):
     try:
         client = ZookeeperClient(args.zk_host)
-        task_pool = TaskPool(client, args.workername, args.appname, args.conf_path, args.thread_classes_paths)
+        task_pool = TaskPool(
+            client,
+            args.workername,
+            args.appname,
+            args.conf_path,
+            args.thread_classes_paths
+        )
 
         def handler(signum, frame):
             task_pool.stop()
@@ -138,6 +111,75 @@ def status(args):
 
     client.stop()
     client.close()
+
+def main():
+    parser = ArgumentParser(
+        description='Task manager script', formatter_class=RawTextHelpFormatter
+    )
+
+    parser.add_argument(
+        'action', type=str, choices=['run', 'update-conf', 'status'],
+        metavar='action',
+        help='Allowed actions are:\n'\
+             ' - run\t\trun the task manager\n'\
+             ' - update-conf\tupdate the tasks configuration on Zookeeper\n'
+             ' - status\tget information of the tasks running on all workers '\
+             'that are running the application')
+    
+    parser.add_argument(
+        '--zk-host', dest='zk_host', type=str, metavar='HOSTS_STRING',
+        help='Host or comma-separated list of hosts formatted as host:port')
+    
+    parser.add_argument(
+        '--conf-path', dest='conf_path',
+        type=lambda p: str(pathlib.Path(p).absolute()),
+        help='Path for the configuration files folder')
+    
+    parser.add_argument(
+        '--thread-classes-paths', dest='thread_classes_paths',
+        type=lambda paths: list(map(
+            lambda path: str(pathlib.Path(path).absolute()),
+            paths.split(','))),
+        help='Path for the tasks threads classes definitions')
+    
+    parser.add_argument(
+        '--poll-interval', dest='poll_interval', type=int, default=5,
+        help='Poll time interval for configuration or party changes')
+    
+    parser.add_argument(
+        '--workername', dest='workername', type=str,
+        help='A name for the worker')
+    
+    parser.add_argument(
+        '--appname', dest='appname', type=str,
+        help='The name of the application to execute')
+    
+    parser.add_argument(
+        '-f', dest='format', type=str, choices=['json', 'yaml'],
+        default='json', help='The output format for the application status')
+    
+    args = parser.parse_args()
+
+    def validate_args(required_options: list):
+        option_errors = []
+        for option in required_options:
+            dest = parser._option_string_actions[option].dest
+            if not getattr(args, dest):
+                option_errors += [option]
+        if option_errors:
+            parser.error(f'the following arguments are required: {", ".join(option_errors)}')
+
+    if args.action == 'run':
+        validate_args(['--zk-host', '--workername', '--appname', '--thread-classes-paths'])
+        run(args)
+    elif args.action == 'update-conf':
+        validate_args(['--zk-host', '--conf-path'])
+        update_conf(args)
+    elif args.action == 'status':
+        validate_args(['--zk-host', '--appname'])
+        status(args)
+    
+    exit(0)
 
 if __name__ == "__main__":
     main()
