@@ -16,16 +16,14 @@ class TaskManagerThread(Thread):
     def run(self):
         try:
             self.setup()
+            while True:
+                try:
+                    self.loop()
+                except Exception as e:
+                    print(f'[{self.taskname}] error: {str(e)}')
+                    break
+                if self.stop_event.is_set():
+                    self.stop()
+                    break
         except Exception as e:
             print(f'[{self.taskname}] error: {str(e)}')
-            
-        while True:
-            try:
-                self.loop()
-            except Exception as e:
-                print(f'[{self.taskname}] error: {str(e)}')
-                break
-
-            if self.stop_event.is_set():
-                self.stop()
-                break
