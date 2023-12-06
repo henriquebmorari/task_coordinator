@@ -14,7 +14,11 @@ class TaskManagerThread(Thread):
         return
 
     def run(self):
-        self.setup()
+        try:
+            self.setup()
+        except Exception as e:
+            print(f'[{self.taskname}] error: {str(e)}')
+            
         while True:
             try:
                 self.loop()
