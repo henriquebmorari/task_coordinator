@@ -4,9 +4,9 @@ import yaml
 import signal
 import pathlib
 from time import sleep
-from task import TaskPool
+from taskmanager import TaskPool
 from argparse import ArgumentParser
-from coord_client import KazooCoordClient
+from zookeeperclient import ZookeeperClient
 from datetime import datetime, timezone, timedelta
 
 def main():
@@ -44,7 +44,7 @@ def main():
 
 def run(args):
     try:
-        client = KazooCoordClient(args.zk_host)
+        client = ZookeeperClient(args.zk_host)
         task_pool = TaskPool(client, args.workername, args.appname, args.conf_path, args.thread_classes_paths)
 
         def handler(signum, frame):
@@ -62,7 +62,7 @@ def run(args):
             task_pool.stop()
 
 def update_conf(args):
-    client = KazooCoordClient(args.zk_host)
+    client = ZookeeperClient(args.zk_host)
 
     for tasks_conf_file in glob.glob(args.conf_path + '/*.yaml'):
         with open(tasks_conf_file, 'r') as f:
@@ -82,7 +82,7 @@ def update_conf(args):
         print(task_conf_node)
 
 def status(args):
-    client = KazooCoordClient(args.zk_host)
+    client = ZookeeperClient(args.zk_host)
 
     app_path = f'/apps/{args.appname}'
 

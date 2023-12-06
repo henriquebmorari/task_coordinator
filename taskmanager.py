@@ -4,7 +4,7 @@ import yaml
 import importlib
 from math import ceil
 from time import time, sleep
-from threading import Thread, Event
+from taskmanagerthread import Event, TaskManagerThread
 
 class TaskPool():
     def __init__(self, coord_client, workername, appname, conf_path, thread_classes_paths):
@@ -27,7 +27,7 @@ class TaskPool():
             sys.path.append(path)
             for module in [f[:-3] for f in os.listdir(path) if f.endswith('.py')]:
                 module_objects = importlib.import_module(module).__dict__
-                module_objects = { k: v for k, v in module_objects.items() if isinstance(v,type) and issubclass(v,Thread) }
+                module_objects = { k: v for k, v in module_objects.items() if isinstance(v,type) and issubclass(v,TaskManagerThread) }
                 self.classes.update(module_objects)
 
         return self.classes
@@ -191,7 +191,7 @@ class TaskPool():
 
 class Task():
     def __init__(self, coord_client, workername, appname, taskname, conf_path, thread_class, **kwargs):
-        assert issubclass(thread_class, Thread), "thread_class argument must inherit the threading.Thread class"
+        assert issubclass(thread_class, TaskManagerThread), "thread_class argument must inherit the taskmanagerthread.TaskManagerThread class"
         self.stop_event = Event()
         self.thread = None
         self.thread_class = thread_class

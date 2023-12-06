@@ -1,19 +1,17 @@
 from time import sleep
-from threading import Thread
+from taskmanagerthread import TaskManagerThread
 
-class SampleThread(Thread):
-    def __init__(self, workername, name):
-        Thread.__init__(self)
-        self.workername = workername
+class SampleThread(TaskManagerThread):
+    def __init__(self, taskname, name):
+        TaskManagerThread.__init__(self)
+        self.taskname = taskname
         self.name = name
 
-    def set_stop_event(self, stop_event):
-        self.stop_event = stop_event
+    def setup(self):
+        print(f'[{self.taskname}] {self.name} running')
 
-    def run(self):
-        print(f'{self.workername}: {self.name} running')
-        while True:
-            sleep(1)
-            if self.stop_event.is_set():
-                break
-        print(f'{self.workername}: {self.name} down')
+    def loop(self):
+        sleep(1)
+
+    def stop(self):
+        print(f'[{self.taskname}] {self.name} down')
