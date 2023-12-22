@@ -4,7 +4,7 @@ import yaml
 import importlib
 from math import ceil
 from time import time, sleep
-from taskmanagerthread import Event, TaskManagerThread
+from taskcoordinatorthread import Event, TaskCoordinatorThread
 
 class TaskPool():
     """
@@ -44,7 +44,7 @@ class TaskPool():
         self.update_tasks()
 
     def update_thread_classes(self, thread_classes_paths: list):
-        """Find and import all classes that extend TaskManagerThread in
+        """Find and import all classes that extend TaskCoordinatorThread in
         thread_classes_paths
         """
 
@@ -53,7 +53,7 @@ class TaskPool():
             sys.path.append(path)
             for module in [f[:-3] for f in os.listdir(path) if f.endswith('.py')]:
                 module_objects = importlib.import_module(module).__dict__
-                module_objects = { k: v for k, v in module_objects.items() if isinstance(v,type) and issubclass(v,TaskManagerThread) }
+                module_objects = { k: v for k, v in module_objects.items() if isinstance(v,type) and issubclass(v,TaskCoordinatorThread) }
                 self.classes.update(module_objects)
         return self.classes
 
@@ -250,7 +250,7 @@ class Task():
     ----------
     stop_event : Event
         Event object used to stop the task execution
-    thread : TaskManagerThread
+    thread : TaskCoordinatorThread
         Thread object for the task execution
     thread_class : type
         The class that implements the task
@@ -273,7 +273,7 @@ class Task():
     """
 
     def __init__(self, zk_client, workername, appname, taskname, conf_path, thread_class, task_args):
-        assert issubclass(thread_class, TaskManagerThread), "thread_class argument must inherit the taskmanagerthread.TaskManagerThread class"
+        assert issubclass(thread_class, TaskCoordinatorThread), "thread_class argument must inherit the taskcoordinatorthread.TaskCoordinatorThread class"
         self.stop_event = Event()
         self.thread = None
         self.thread_class = thread_class

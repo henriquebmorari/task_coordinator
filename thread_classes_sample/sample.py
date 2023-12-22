@@ -1,9 +1,9 @@
 from time import sleep
-from taskmanagerthread import TaskManagerThread
+from taskcoordinatorthread import TaskCoordinatorThread
 
-class SampleThread(TaskManagerThread):
+class SampleThread(TaskCoordinatorThread):
     def __init__(self, taskname, name):
-        TaskManagerThread.__init__(self)
+        TaskCoordinatorThread.__init__(self)
         self.taskname = taskname
         self.name = name
 

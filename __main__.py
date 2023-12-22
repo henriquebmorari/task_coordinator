@@ -4,7 +4,7 @@ import yaml
 import signal
 import pathlib
 from time import sleep
-from taskmanager import TaskPool
+from taskcoordinator import TaskPool
 from argparse import ArgumentParser, RawTextHelpFormatter
 from zookeeperclient import ZookeeperClient
 from datetime import datetime, timezone, timedelta
@@ -114,14 +114,14 @@ def status(args):
 
 def main():
     parser = ArgumentParser(
-        description='Task manager script', formatter_class=RawTextHelpFormatter
+        description='Task coordinator script', formatter_class=RawTextHelpFormatter
     )
 
     parser.add_argument(
         'action', type=str, choices=['run', 'update-conf', 'status'],
         metavar='action',
         help='Allowed actions are:\n'\
-             ' - run\t\trun the task manager\n'\
+             ' - run\t\trun the task coordinator\n'\
              ' - update-conf\tupdate the tasks configuration on Zookeeper\n'
              ' - status\tget information of the tasks running on all workers '\
              'that are running the application')

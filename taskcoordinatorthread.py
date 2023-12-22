@@ -1,6 +1,6 @@
 from threading import Thread, Event
 
-class TaskManagerThread(Thread):
+class TaskCoordinatorThread(Thread):
     """ 
     Thread class to implement the tasks functionalities.
     Extend this class overriding the "setup", "loop" and "stop" methods.
